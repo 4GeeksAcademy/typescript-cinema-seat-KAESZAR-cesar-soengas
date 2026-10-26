@@ -24,7 +24,30 @@ function mostrarSala(sala: Sala): void {
   });
 }
 
+function reservarAsiento(sala: Sala, fila: number, columna: number): string {
+  const indiceFila = fila - 1;
+  const indiceColumna = columna - 1;
+  const cantidadColumnas = sala[0]?.length ?? 0;
+
+  if (
+    indiceFila < 0 ||
+    indiceFila >= sala.length ||
+    indiceColumna < 0 ||
+    indiceColumna >= cantidadColumnas
+  ) {
+    return `Error: la fila ${fila} o la columna ${columna} no existe.`;
+  }
+
+  if (sala[indiceFila][indiceColumna] === 1) {
+    return `Error: el asiento de la fila ${fila}, columna ${columna} ya está ocupado.`;
+  }
+
+  sala[indiceFila][indiceColumna] = 1;
+  return `Éxito: asiento reservado en la fila ${fila}, columna ${columna}.`;
+}
+
 const sala = inicializarSala(8, 10);
+console.log(reservarAsiento(sala, 3, 5));
 mostrarSala(sala);
 
 // Conserva el mensaje del proyecto cuando se abre en el navegador.
