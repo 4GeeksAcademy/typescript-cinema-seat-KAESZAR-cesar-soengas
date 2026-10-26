@@ -75,7 +75,7 @@ function contarAsientos(sala: Sala): { ocupados: number; disponibles: number } {
 function buscarAsientosContiguos(
   sala: Sala,
   cantidad: number,
-): { fila: number; columnaInicial: number } | null {
+): { fila: number; columnaInicial: number; columnaFinal: number } | null {
   if (!Number.isInteger(cantidad) || cantidad <= 0) {
     return null;
   }
@@ -94,6 +94,7 @@ function buscarAsientosContiguos(
           return {
             fila: indiceFila + 1,
             columnaInicial: indiceColumna - cantidad + 2,
+            columnaFinal: indiceColumna + 1,
           };
         }
       } else {
@@ -147,21 +148,26 @@ ejecutarEscenario("d) Sala completamente llena", crearSalaDePrueba(80), [
   [1, 1],
 ]);
 
-// Comprueba los mensajes de búsqueda cuando hay espacio y cuando no lo hay.
-console.log("\n=== Búsqueda de asientos contiguos ===");
-const resultadoContiguos = buscarAsientosContiguos(crearSalaDePrueba(25), 3);
-if (resultadoContiguos) {
-  const ultimaColumna = resultadoContiguos.columnaInicial + 2;
+// Prueba que se devuelve el primer par cuando hay varios disponibles.
+console.log("\n=== Búsqueda del primer par de asientos contiguos ===");
+const resultadoPar = buscarAsientosContiguos(inicializarSala(8, 10), 2);
+if (resultadoPar) {
   console.log(
-    `Asientos contiguos encontrados: fila ${resultadoContiguos.fila}, columnas ${resultadoContiguos.columnaInicial}-${ultimaColumna}.`,
+    `Primer par encontrado: fila ${resultadoPar.fila}, columnas ${resultadoPar.columnaInicial} y ${resultadoPar.columnaFinal}.`,
   );
 } else {
-  console.log("No se encontraron suficientes asientos contiguos disponibles.");
+  console.log("No se encontraron dos asientos contiguos disponibles.");
 }
 
-const resultadoSalaLlena = buscarAsientosContiguos(crearSalaDePrueba(80), 2);
-if (!resultadoSalaLlena) {
-  console.log("No se encontraron asientos contiguos: la sala está completa.");
+// Aunque quedan asientos libres, están separados y no forman un par contiguo.
+const salaSinPares = crearSalaDePrueba(80);
+salaSinPares[0][0] = 0;
+salaSinPares[0][2] = 0;
+const resultadoSinPar = buscarAsientosContiguos(salaSinPares, 2);
+if (!resultadoSinPar) {
+  console.log(
+    "No se encontraron dos asientos contiguos disponibles; los asientos libres están separados.",
+  );
 }
 
 // Conserva el mensaje del proyecto cuando se abre en el navegador.
