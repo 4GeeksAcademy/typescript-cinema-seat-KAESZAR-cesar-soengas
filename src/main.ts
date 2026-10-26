@@ -183,13 +183,17 @@ if (typeof document === "undefined") {
             <p class="mt-1 text-sm text-slate-600">Haz clic en un asiento libre para reservarlo.</p>
           </div>
           <div class="flex gap-4 text-sm" aria-label="Leyenda">
-            <span class="flex items-center gap-2"><span class="h-4 w-4 rounded bg-emerald-500"></span>Libre</span>
-            <span class="flex items-center gap-2"><span class="h-4 w-4 rounded bg-slate-400"></span>Ocupado</span>
+            <span class="flex items-center gap-2"><span class="h-4 w-4 rounded bg-blue-500"></span>Libre</span>
+            <span class="flex items-center gap-2"><span class="h-4 w-4 rounded bg-red-500"></span>Ocupado</span>
           </div>
         </div>
 
-        <div class="mb-6 rounded-t-[50%] bg-slate-200 py-2 text-center text-xs font-semibold uppercase tracking-[0.3em] text-slate-600">
-          Pantalla
+        <div class="mb-6 overflow-x-auto pb-2">
+          <div class="mx-auto min-w-[32rem] max-w-[32rem] pl-8">
+            <div class="w-[30rem] rounded-t-[50%] bg-slate-200 py-2 text-center text-xs font-semibold uppercase tracking-[0.3em] text-slate-600">
+              Pantalla
+            </div>
+          </div>
         </div>
         <div id="mapa-asientos" class="space-y-2 overflow-x-auto pb-2"></div>
 
@@ -215,28 +219,18 @@ if (typeof document === "undefined") {
       mapaElemento.innerHTML = sala
         .map(
           (fila, indiceFila) => `
-            <div class="flex min-w-max items-center gap-3">
-              <span class="w-6 text-sm font-semibold text-slate-500">${indiceFila + 1}</span>
-              <div class="grid grid-cols-10 gap-2">
-                ${fila
-                  .map((asiento, indiceColumna) => {
-                    const ocupado = asiento === 1;
-                    const estilo = ocupado
-                      ? "cursor-not-allowed bg-slate-400 text-white"
-                      : "bg-emerald-500 text-white transition hover:bg-emerald-600 focus:outline-2 focus:outline-offset-2 focus:outline-emerald-700";
-
-                    return `
-                      <button
-                        type="button"
-                        data-fila="${indiceFila + 1}"
-                        data-columna="${indiceColumna + 1}"
-                        aria-label="Fila ${indiceFila + 1}, asiento ${indiceColumna + 1}, ${ocupado ? "ocupado" : "libre"}"
-                        ${ocupado ? "disabled" : ""}
-                        class="h-9 w-9 rounded-md text-xs font-semibold ${estilo}"
-                      >${ocupado ? "X" : "L"}</button>
-                    `;
-                  })
-                  .join("")}
+            <div class="mx-auto grid min-w-[32rem] max-w-[32rem] grid-cols-[2rem_1fr] items-center">
+              <span class="text-sm font-semibold text-slate-500">${indiceFila + 1}</span>
+              <div class="flex w-[30rem] items-center justify-center gap-8">
+                <div class="grid grid-cols-3 gap-2">
+                  ${fila.slice(0, 3).map((asiento, indiceColumna) => renderizarAsiento(asiento, indiceFila, indiceColumna)).join("")}
+                </div>
+                <div class="grid grid-cols-4 gap-2">
+                  ${fila.slice(3, 7).map((asiento, indiceColumna) => renderizarAsiento(asiento, indiceFila, indiceColumna + 3)).join("")}
+                </div>
+                <div class="grid grid-cols-3 gap-2">
+                  ${fila.slice(7, 10).map((asiento, indiceColumna) => renderizarAsiento(asiento, indiceFila, indiceColumna + 7)).join("")}
+                </div>
               </div>
             </div>
           `,
@@ -246,6 +240,29 @@ if (typeof document === "undefined") {
       const conteo = contarAsientos(sala);
       ocupadosElemento.textContent = String(conteo.ocupados);
       disponiblesElemento.textContent = String(conteo.disponibles);
+    }
+
+    // Genera un botón accesible para una posición de la matriz.
+    function renderizarAsiento(
+      asiento: Asiento,
+      indiceFila: number,
+      indiceColumna: number,
+    ): string {
+      const ocupado = asiento === 1;
+      const estilo = ocupado
+        ? "cursor-not-allowed bg-red-500 text-white"
+        : "bg-blue-500 text-white transition hover:bg-blue-600 focus:outline-2 focus:outline-offset-2 focus:outline-blue-700";
+
+      return `
+        <button
+          type="button"
+          data-fila="${indiceFila + 1}"
+          data-columna="${indiceColumna + 1}"
+          aria-label="Fila ${indiceFila + 1}, asiento ${indiceColumna + 1}, ${ocupado ? "ocupado" : "libre"}"
+          ${ocupado ? "disabled" : ""}
+          class="h-9 w-9 rounded-md text-xs font-semibold ${estilo}"
+        >${ocupado ? "X" : "L"}</button>
+      `;
     }
 
     // Reserva el asiento clicado, comunica el resultado y redibuja el mapa.
