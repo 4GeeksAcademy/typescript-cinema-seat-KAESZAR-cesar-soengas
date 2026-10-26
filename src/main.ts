@@ -137,46 +137,134 @@ function ejecutarEscenario(
   console.log(`Asientos disponibles: ${conteo.disponibles}`);
 }
 
-// Prueba salas vacías, parcialmente ocupadas, casi llenas y completamente llenas.
-ejecutarEscenario("a) Sala vacía", crearSalaDePrueba(0));
-ejecutarEscenario("b) Sala parcialmente ocupada", crearSalaDePrueba(25), [
-  [3, 6], // Reserva disponible.
-  [1, 1], // Intenta reservar un asiento ya ocupado.
-]);
-ejecutarEscenario("c) Sala casi llena", crearSalaDePrueba(78), [[8, 9]]);
-ejecutarEscenario("d) Sala completamente llena", crearSalaDePrueba(80), [
-  [1, 1],
-]);
+if (typeof document === "undefined") {
+  // Los escenarios de consola solo corren con `npm run console`.
+  ejecutarEscenario("a) Sala vacía", crearSalaDePrueba(0));
+  ejecutarEscenario("b) Sala parcialmente ocupada", crearSalaDePrueba(25), [
+    [3, 6],
+    [1, 1],
+  ]);
+  ejecutarEscenario("c) Sala casi llena", crearSalaDePrueba(78), [[8, 9]]);
+  ejecutarEscenario("d) Sala completamente llena", crearSalaDePrueba(80), [
+    [1, 1],
+  ]);
 
-// Prueba que se devuelve el primer par cuando hay varios disponibles.
-console.log("\n=== Búsqueda del primer par de asientos contiguos ===");
-const resultadoPar = buscarAsientosContiguos(inicializarSala(8, 10), 2);
-if (resultadoPar) {
-  console.log(
-    `Primer par encontrado: fila ${resultadoPar.fila}, columnas ${resultadoPar.columnaInicial} y ${resultadoPar.columnaFinal}.`,
-  );
+  console.log("\n=== Búsqueda del primer par de asientos contiguos ===");
+  const resultadoPar = buscarAsientosContiguos(inicializarSala(8, 10), 2);
+  if (resultadoPar) {
+    console.log(
+      `Primer par encontrado: fila ${resultadoPar.fila}, columnas ${resultadoPar.columnaInicial} y ${resultadoPar.columnaFinal}.`,
+    );
+  } else {
+    console.log("No se encontraron dos asientos contiguos disponibles.");
+  }
+
+  const salaSinPares = crearSalaDePrueba(80);
+  salaSinPares[0][0] = 0;
+  salaSinPares[0][2] = 0;
+  if (!buscarAsientosContiguos(salaSinPares, 2)) {
+    console.log(
+      "No se encontraron dos asientos contiguos disponibles; los asientos libres están separados.",
+    );
+  }
 } else {
-  console.log("No se encontraron dos asientos contiguos disponibles.");
-}
-
-// Aunque quedan asientos libres, están separados y no forman un par contiguo.
-const salaSinPares = crearSalaDePrueba(80);
-salaSinPares[0][0] = 0;
-salaSinPares[0][2] = 0;
-const resultadoSinPar = buscarAsientosContiguos(salaSinPares, 2);
-if (!resultadoSinPar) {
-  console.log(
-    "No se encontraron dos asientos contiguos disponibles; los asientos libres están separados.",
-  );
-}
-
-// Conserva el mensaje del proyecto cuando se abre en el navegador.
-if (typeof document !== "undefined") {
   import("./style.css").then(() => {
-    const app = document.querySelector<HTMLParagraphElement>("#app");
-    if (app) {
-      app.textContent = "If you can see this, Tailwind is working.";
+    const app = document.querySelector<HTMLElement>("#app");
+    if (!app) return;
+
+    // La matriz bidimensional es la única fuente del estado de los asientos.
+    const sala = inicializarSala(8, 10);
+
+    app.innerHTML = `
+      <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
+        <div class="mb-6 flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <h2 class="text-xl font-semibold text-slate-900">Selecciona tus asientos</h2>
+            <p class="mt-1 text-sm text-slate-600">Haz clic en un asiento libre para reservarlo.</p>
+          </div>
+          <div class="flex gap-4 text-sm" aria-label="Leyenda">
+            <span class="flex items-center gap-2"><span class="h-4 w-4 rounded bg-emerald-500"></span>Libre</span>
+            <span class="flex items-center gap-2"><span class="h-4 w-4 rounded bg-slate-400"></span>Ocupado</span>
+          </div>
+        </div>
+
+        <div class="mb-6 rounded-t-[50%] bg-slate-200 py-2 text-center text-xs font-semibold uppercase tracking-[0.3em] text-slate-600">
+          Pantalla
+        </div>
+        <div id="mapa-asientos" class="space-y-2 overflow-x-auto pb-2"></div>
+
+        <p id="estado-reserva" class="mt-4 min-h-6 text-sm font-medium" role="status" aria-live="polite"></p>
+        <div class="mt-3 flex flex-wrap gap-6 border-t border-slate-200 pt-4 text-sm text-slate-700">
+          <p>Ocupados: <strong id="total-ocupados">0</strong></p>
+          <p>Disponibles: <strong id="total-disponibles">80</strong></p>
+        </div>
+      </section>
+    `;
+
+    const mapa = document.querySelector<HTMLElement>("#mapa-asientos");
+    const estado = document.querySelector<HTMLElement>("#estado-reserva");
+    const ocupados = document.querySelector<HTMLElement>("#total-ocupados");
+    const disponibles = document.querySelector<HTMLElement>("#total-disponibles");
+    if (!mapa || !estado || !ocupados || !disponibles) return;
+    const mapaElemento = mapa;
+    const ocupadosElemento = ocupados;
+    const disponiblesElemento = disponibles;
+
+    // Dibuja botones desde la matriz y actualiza el resumen de disponibilidad.
+    function actualizarMapa(): void {
+      mapaElemento.innerHTML = sala
+        .map(
+          (fila, indiceFila) => `
+            <div class="flex min-w-max items-center gap-3">
+              <span class="w-6 text-sm font-semibold text-slate-500">${indiceFila + 1}</span>
+              <div class="grid grid-cols-10 gap-2">
+                ${fila
+                  .map((asiento, indiceColumna) => {
+                    const ocupado = asiento === 1;
+                    const estilo = ocupado
+                      ? "cursor-not-allowed bg-slate-400 text-white"
+                      : "bg-emerald-500 text-white transition hover:bg-emerald-600 focus:outline-2 focus:outline-offset-2 focus:outline-emerald-700";
+
+                    return `
+                      <button
+                        type="button"
+                        data-fila="${indiceFila + 1}"
+                        data-columna="${indiceColumna + 1}"
+                        aria-label="Fila ${indiceFila + 1}, asiento ${indiceColumna + 1}, ${ocupado ? "ocupado" : "libre"}"
+                        ${ocupado ? "disabled" : ""}
+                        class="h-9 w-9 rounded-md text-xs font-semibold ${estilo}"
+                      >${ocupado ? "X" : "L"}</button>
+                    `;
+                  })
+                  .join("")}
+              </div>
+            </div>
+          `,
+        )
+        .join("");
+
+      const conteo = contarAsientos(sala);
+      ocupadosElemento.textContent = String(conteo.ocupados);
+      disponiblesElemento.textContent = String(conteo.disponibles);
     }
+
+    // Reserva el asiento clicado, comunica el resultado y redibuja el mapa.
+    mapaElemento.addEventListener("click", (evento: MouseEvent) => {
+      const objetivo = evento.target;
+      if (!(objetivo instanceof HTMLButtonElement)) return;
+
+      const fila = Number(objetivo.dataset.fila);
+      const columna = Number(objetivo.dataset.columna);
+      const mensaje = reservarAsiento(sala, fila, columna);
+
+      estado.textContent = mensaje;
+      estado.className = `mt-4 min-h-6 text-sm font-medium ${
+        mensaje.startsWith("Éxito") ? "text-emerald-700" : "text-red-700"
+      }`;
+      actualizarMapa();
+    });
+
+    actualizarMapa();
   });
 }
 
