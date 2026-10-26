@@ -46,9 +46,29 @@ function reservarAsiento(sala: Sala, fila: number, columna: number): string {
   return `Éxito: asiento reservado en la fila ${fila}, columna ${columna}.`;
 }
 
+function contarAsientos(sala: Sala): { ocupados: number; disponibles: number } {
+  let ocupados = 0;
+  let disponibles = 0;
+
+  sala.forEach((fila) => {
+    fila.forEach((asiento) => {
+      if (asiento === 1) {
+        ocupados++;
+      } else {
+        disponibles++;
+      }
+    });
+  });
+
+  return { ocupados, disponibles };
+}
+
 const sala = inicializarSala(8, 10);
 console.log(reservarAsiento(sala, 3, 5));
 mostrarSala(sala);
+const conteo = contarAsientos(sala);
+console.log(`Asientos ocupados: ${conteo.ocupados}`);
+console.log(`Asientos disponibles: ${conteo.disponibles}`);
 
 // Conserva el mensaje del proyecto cuando se abre en el navegador.
 if (typeof document !== "undefined") {
