@@ -1,15 +1,7 @@
-# Hola Mundo con Typescript
+# Sistema de reservas de asientos de cine
 
-<!-- hide -->
-> Por [@ehiber](https://github.com/ehiber) y contribuidores de [4Geeks Academy](https://4geeksacademy.com/)
 
-[![build by developers](https://img.shields.io/badge/build_by-Developers-blue)](https://4geeks.com)
-[![twitter](https://img.shields.io/twitter/follow/4geeksacademy?style=social&logo=twitter)](https://twitter.com/4geeksacademy)
-
-*These instructions are available in [english](./README.md).*
-<!-- endhide -->
-
-Empieza a programar un sitio con TypeScript/HTML/CSS en 30 segundos abriendo esta plantilla con [One-Click Coding](https://s.4geeks.com/start?repo=https://github.com/4GeeksAcademy/typescript-hello) de 4Geeks o en tu computadora local.
+Aplicación web para visualizar la sala de cine y reservar asientos usando TypeScript, HTML y Tailwind CSS.
 
 ## Antes de empezar
 
@@ -19,15 +11,16 @@ Instala los paquetes escribiendo:
 npm install
 ```
 
-## Como ejecuto mi sitio para ver cambios en vivo?
+## Como ejecuto la interfaz de reservas?
 
-Escribe en la linea de comandos:
+Instala las dependencias y arranca el servidor de desarrollo:
 
 ```bash
+npm install
 npm run start
 ```
 
-Luego abre la URL local en el navegador (normalmente `http://localhost:5173`).
+Abre en el navegador la URL local que muestre Vite (normalmente `http://localhost:5173`). En el mapa, haz clic en un asiento azul disponible para reservarlo; los asientos ocupados se muestran en rojo.
 
 ## Como ejecuto esto en GitHub Codespaces?
 
@@ -67,7 +60,7 @@ Depende del lenguaje:
 
 Puedes agregar mas archivos cuando quieras, solo asegúrate de importarlos desde `main.ts`.
 
-Nota: si puedes ver la tarjeta de "Hello Rigo" y el mensaje "If you can see this, Tailwind is working.", entonces Tailwind esta configurado correctamente.
+La interfaz presenta la sala, el estado de los asientos y los conteos de ocupados y disponibles.
 
 ## Solucion de problemas
 
@@ -104,8 +97,6 @@ import { myVar } from "./file2";
 
 Este boilerplate es compatible con Vercel en un solo paso.
 
-## Contribuidores
 
-Esta plantilla fue creada como parte del [Coding Bootcamp de 4Geeks Academy](https://4geeksacademy.com/us/coding-bootcamp) por [ehiber](https://github.com/ehiber) y otros contribuidores. Conoce mas sobre nuestro [AI Engineering Course](https://4geeksacademy.com/us/coding-bootcamps/ai-engineering), [Full Stack Developer Course](https://4geeksacademy.com/us/coding-bootcamps/part-time-full-stack-developer), y [Data Science Bootcamp](https://4geeksacademy.com/us/coding-bootcamps/datascience-machine-learning).
 
-Puedes encontrar otras plantillas y recursos como este en la [pagina de GitHub de la escuela](https://github.com/4geeksacademy/).
+
